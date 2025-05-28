@@ -4,15 +4,15 @@ import http.server
 import socketserver
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
-    def init(self, args, **kwargs):
-        super().init(args, directory="www", **kwargs)
-
     def do_GET(self):
+        print(f"Richiesta: {self.client_address[0]} - {self.path}")
         if self.path == '/':
+            print("  Redirect a www/index.html")
             self.send_response(302)
-            self.send_header('Location', '/index.html')
+            self.send_header('Location', 'www/index.html')
             self.end_headers()
         else:
+            print("  Servito file normale")
             super().do_GET()
 server = socketserver.ThreadingTCPServer(('127.0.0.1',8080), MyHTTPRequestHandler )
 
@@ -24,12 +24,14 @@ def signal_handler(signal, frame):
     try:
       if( server ):
         server.server_close()
+        print("Server chiuso correttamente")
     finally:
       sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
 
 try:
-    print(f"Server pronto su http://127.0.0.1:8080/ ...")
+    print("Server avviato su http://127.0.0.1:8080/")
+    print("Premi Ctrl+C per fermare\n")
     server.serve_forever()
 except KeyboardInterrupt:
   pass
